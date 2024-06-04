@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=pass
+      - DB_NAME=tarpaulin
+      - JWT_SECRET=beans
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+    networks:
+      - tarpaulin-network
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: tarpaulin
+    ports:
+      - "3306:3306"
+    networks:
+      - tarpaulin-network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - tarpaulin-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - tarpaulin-network
+
+networks:
+  tarpaulin-network:
+    driver: bridge
