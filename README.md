@@ -1,7 +1,3 @@
-# tarpaulin-api
-
-### README
-
 # Tarpaulin API
 
 Tarpaulin is a lightweight course management tool designed as an alternative to Canvas. This project involves developing a complete RESTful API for Tarpaulin, allowing users (instructors and students) to manage courses, assignments, and submissions.
