@@ -1,0 +1,82 @@
+[
+    {
+        "id": 1,
+        "courseId": 5,
+        "title": "Assignment 1",
+        "description": "Description for assignment 1",
+        "points": 22,
+        "due": "2024-06-23 19:27:23"
+    },
+    {
+        "id": 2,
+        "courseId": 4,
+        "title": "Assignment 2",
+        "description": "Description for assignment 2",
+        "points": 58,
+        "due": "2024-07-01 19:27:23"
+    },
+    {
+        "id": 3,
+        "courseId": 1,
+        "title": "Assignment 3",
+        "description": "Description for assignment 3",
+        "points": 99,
+        "due": "2024-07-07 19:27:23"
+    },
+    {
+        "id": 4,
+        "courseId": 2,
+        "title": "Assignment 4",
+        "description": "Description for assignment 4",
+        "points": 52,
+        "due": "2024-06-18 19:27:23"
+    },
+    {
+        "id": 5,
+        "courseId": 2,
+        "title": "Assignment 5",
+        "description": "Description for assignment 5",
+        "points": 62,
+        "due": "2024-07-01 19:27:23"
+    },
+    {
+        "id": 6,
+        "courseId": 5,
+        "title": "Assignment 6",
+        "description": "Description for assignment 6",
+        "points": 63,
+        "due": "2024-06-22 19:27:23"
+    },
+    {
+        "id": 7,
+        "courseId": 3,
+        "title": "Assignment 7",
+        "description": "Description for assignment 7",
+        "points": 53,
+        "due": "2024-07-04 19:27:23"
+    },
+    {
+        "id": 8,
+        "courseId": 4,
+        "title": "Assignment 8",
+        "description": "Description for assignment 8",
+        "points": 21,
+        "due": "2024-06-28 19:27:23"
+    },
+    {
+        "id": 9,
+        "courseId": 5,
+        "title": "Assignment 9",
+        "description": "Description for assignment 9",
+        "points": 20,
+        "due": "2024-06-14 19:27:23"
+    },
+    {
+        "id": 10,
+        "courseId": 2,
+        "title": "Assignment 10",
+        "description": "Description for assignment 10",
+        "points": 23,
+        "due": "2024-06-24 19:27:23"
+    }
+]

@@ -1,0 +1,21 @@
+[
+    {
+      "contentType": "application/pdf",
+      "filename": "submission1.pdf",
+      "path": "/uploads/submission1.pdf",
+      "assignmentId": 1,
+      "studentId": 1,
+      "timestamp": "2022-06-14T17:00:00-07:00",
+      "grade": 90.0
+    },
+    {
+      "contentType": "application/pdf",
+      "filename": "submission2.pdf",
+      "path": "/uploads/submission2.pdf",
+      "assignmentId": 2,
+      "studentId": 2,
+      "timestamp": "2022-06-15T17:00:00-07:00",
+      "grade": 85.0
+    }
+  ]
+  

@@ -1,0 +1,317 @@
+{
+    "info": {
+      "name": "Courses API",
+      "_postman_id": "example-id",
+      "description": "Postman collection for testing the Courses API",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "Create Course",
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer {{token}}",
+              "type": "text"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json",
+              "type": "text"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n    \"title\": \"Sample Course\",\n    \"description\": \"This is a sample course.\",\n    \"instructorId\": 1\n}"
+          },
+          "url": {
+            "raw": "http://localhost:3000/api/courses",
+            "protocol": "http",
+            "host": [
+              "localhost"
+            ],
+            "port": "3000",
+            "path": [
+              "api",
+              "courses"
+            ]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Get All Courses",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "http://localhost:3000/api/courses?page=1&pageSize=10",
+            "protocol": "http",
+            "host": [
+              "localhost"
+            ],
+            "port": "3000",
+            "path": [
+              "api",
+              "courses"
+            ],
+            "query": [
+              {
+                "key": "page",
+                "value": "1"
+              },
+              {
+                "key": "pageSize",
+                "value": "10"
+              }
+            ]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Get Course by ID",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "http://localhost:3000/api/courses/:courseId",
+            "protocol": "http",
+            "host": [
+              "localhost"
+            ],
+            "port": "3000",
+            "path": [
+              "api",
+              "courses",
+              ":courseId"
+            ],
+            "variable": [
+              {
+                "key": "courseId",
+                "value": "1"
+              }
+            ]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Update Course",
+        "request": {
+          "method": "PATCH",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer {{token}}",
+              "type": "text"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json",
+              "type": "text"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n    \"title\": \"Updated Course Title\",\n    \"description\": \"Updated course description.\"\n}"
+          },
+          "url": {
+            "raw": "http://localhost:3000/api/courses/:courseId",
+            "protocol": "http",
+            "host": [
+              "localhost"
+            ],
+            "port": "3000",
+            "path": [
+              "api",
+              "courses",
+              ":courseId"
+            ],
+            "variable": [
+              {
+                "key": "courseId",
+                "value": "1"
+              }
+            ]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Delete Course",
+        "request": {
+          "method": "DELETE",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer {{token}}",
+              "type": "text"
+            }
+          ],
+          "url": {
+            "raw": "http://localhost:3000/api/courses/:courseId",
+            "protocol": "http",
+            "host": [
+              "localhost"
+            ],
+            "port": "3000",
+            "path": [
+              "api",
+              "courses",
+              ":courseId"
+            ],
+            "variable": [
+              {
+                "key": "courseId",
+                "value": "1"
+              }
+            ]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Get Students in Course",
+        "request": {
+          "method": "GET",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer {{token}}",
+              "type": "text"
+            }
+          ],
+          "url": {
+            "raw": "http://localhost:3000/api/courses/:courseId/students",
+            "protocol": "http",
+            "host": [
+              "localhost"
+            ],
+            "port": "3000",
+            "path": [
+              "api",
+              "courses",
+              ":courseId",
+              "students"
+            ],
+            "variable": [
+              {
+                "key": "courseId",
+                "value": "1"
+              }
+            ]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Update Enrollment",
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer {{token}}",
+              "type": "text"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json",
+              "type": "text"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n    \"studentIds\": [1, 2, 3]\n}"
+          },
+          "url": {
+            "raw": "http://localhost:3000/api/courses/:courseId/students",
+            "protocol": "http",
+            "host": [
+              "localhost"
+            ],
+            "port": "3000",
+            "path": [
+              "api",
+              "courses",
+              ":courseId",
+              "students"
+            ],
+            "variable": [
+              {
+                "key": "courseId",
+                "value": "1"
+              }
+            ]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Get Course Roster",
+        "request": {
+          "method": "GET",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer {{token}}",
+              "type": "text"
+            }
+          ],
+          "url": {
+            "raw": "http://localhost:3000/api/courses/:courseId/roster",
+            "protocol": "http",
+            "host": [
+              "localhost"
+            ],
+            "port": "3000",
+            "path": [
+              "api",
+              "courses",
+              ":courseId",
+              "roster"
+            ],
+            "variable": [
+              {
+                "key": "courseId",
+                "value": "1"
+              }
+            ]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Get Assignments for Course",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "http://localhost:3000/api/courses/:courseId/assignments",
+            "protocol": "http",
+            "host": [
+              "localhost"
+            ],
+            "port": "3000",
+            "path": [
+              "api",
+              "courses",
+              ":courseId",
+              "assignments"
+            ],
+            "variable": [
+              {
+                "key": "courseId",
+                "value": "1"
+              }
+            ]
+          }
+        },
+        "response": []
+      }
+    ]
+  }
+  

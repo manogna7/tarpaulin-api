@@ -1,0 +1,122 @@
+[
+  {
+      "id": 1,
+      "subject": "CS",
+      "number": "493",
+      "title": "Course 1",
+      "term": "sp22",
+      "instructorId": 2
+  },
+  {
+      "id": 2,
+      "subject": "CS",
+      "number": "494",
+      "title": "Course 2",
+      "term": "sp22",
+      "instructorId": 2
+  },
+  {
+      "id": 3,
+      "subject": "CS",
+      "number": "495",
+      "title": "Course 3",
+      "term": "sp22",
+      "instructorId": 2
+  },
+  {
+      "id": 4,
+      "subject": "CS",
+      "number": "496",
+      "title": "Course 4",
+      "term": "sp22",
+      "instructorId": 2
+  },
+  {
+      "id": 5,
+      "subject": "CS",
+      "number": "497",
+      "title": "Course 5",
+      "term": "sp22",
+      "instructorId": 2
+  },
+  {
+      "id": 6,
+      "subject": "CS",
+      "number": "498",
+      "title": "Course 6",
+      "term": "sp22",
+      "instructorId": 2
+  },
+  {
+      "id": 7,
+      "subject": "CS",
+      "number": "499",
+      "title": "Course 7",
+      "term": "sp22",
+      "instructorId": 2
+  },
+  {
+      "id": 8,
+      "subject": "CS",
+      "number": "500",
+      "title": "Course 8",
+      "term": "sp22",
+      "instructorId": 2
+  },
+  {
+      "id": 9,
+      "subject": "CS",
+      "number": "501",
+      "title": "Course 9",
+      "term": "sp22",
+      "instructorId": 2
+  },
+  {
+      "id": 10,
+      "subject": "CS",
+      "number": "502",
+      "title": "Course 10",
+      "term": "sp22",
+      "instructorId": 2
+  },
+  {
+      "id": 11,
+      "subject": "CS",
+      "number": "503",
+      "title": "Course 11",
+      "term": "sp22",
+      "instructorId": 2
+  },
+  {
+      "id": 12,
+      "subject": "CS",
+      "number": "504",
+      "title": "Course 12",
+      "term": "sp22",
+      "instructorId": 2
+  },
+  {
+      "id": 13,
+      "subject": "CS",
+      "number": "505",
+      "title": "Course 13",
+      "term": "sp22",
+      "instructorId": 2
+  },
+  {
+      "id": 14,
+      "subject": "CS",
+      "number": "506",
+      "title": "Course 14",
+      "term": "sp22",
+      "instructorId": 2
+  },
+  {
+      "id": 15,
+      "subject": "CS",
+      "number": "507",
+      "title": "Course 15",
+      "term": "sp22",
+      "instructorId": 2
+  }
+]

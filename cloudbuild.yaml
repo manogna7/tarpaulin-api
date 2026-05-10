@@ -1,0 +1,24 @@
+steps:
+  # Step 1: Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/team-3-425920/tarpaulin-api', '.']
+  
+  # Step 2: Push the Docker image to Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/team-3-425920/tarpaulin-api']
+  
+  # Step 3: Deploy to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [
+      'run', 'deploy', 'tarpaulin-api',
+      '--image', 'gcr.io/team-3-425920/tarpaulin-api',
+      '--platform', 'managed',
+      '--region', 'us-central1',
+      '--allow-unauthenticated',
+      '--set-env-vars', 'DB_HOST=34.46.127.16,DB_USER=finalP,DB_PASSWORD=finalP,DB_NAME=finalP,DB_PORT=3306,PORT=3000',
+      '--add-cloudsql-instances', 'team-3-425920:us-central1:mysql-instance'
+    ]
+
+# Specify the images to be pushed
+images:
+  - 'gcr.io/team-3-425920/tarpaulin-api'
