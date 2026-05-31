@@ -1,22 +1,29 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const CourseEnrollments = sequelize.define('CourseEnrollments', {
+const ProjectMembership = sequelize.define('ProjectMembership', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true
   },
-  courseId: {
+  projectId: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    field: 'courseId'
   },
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false
+  },
+  projectRole: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'contributor'
   }
 }, {
+  tableName: 'CourseEnrollments',
   timestamps: false
 });
 
-module.exports = CourseEnrollments;
+module.exports = ProjectMembership;

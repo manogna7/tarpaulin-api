@@ -1,24 +1,36 @@
-steps:
-  # Step 1: Build the Docker image
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/team-3-425920/tarpaulin-api', '.']
-  
-  # Step 2: Push the Docker image to Google Container Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/team-3-425920/tarpaulin-api']
-  
-  # Step 3: Deploy to Cloud Run
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args: [
-      'run', 'deploy', 'tarpaulin-api',
-      '--image', 'gcr.io/team-3-425920/tarpaulin-api',
-      '--platform', 'managed',
-      '--region', 'us-central1',
-      '--allow-unauthenticated',
-      '--set-env-vars', 'DB_HOST=34.46.127.16,DB_USER=finalP,DB_PASSWORD=finalP,DB_NAME=finalP,DB_PORT=3306,PORT=3000',
-      '--add-cloudsql-instances', 'team-3-425920:us-central1:mysql-instance'
-    ]
+substitutions:
+  _REGION: us-central1
+  _SERVICE: tarpaulin-api
+  _IMAGE: tarpaulin-api
+  _CLIENT_ORIGIN: https://replace-with-frontend-domain.example
 
-# Specify the images to be pushed
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/tarpaulin/${_IMAGE}:$SHORT_SHA
+      - .
+
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/tarpaulin/${_IMAGE}:$SHORT_SHA
+
+  - name: gcr.io/cloud-builders/gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/tarpaulin/${_IMAGE}:$SHORT_SHA
+      - --platform
+      - managed
+      - --region
+      - ${_REGION}
+      - --no-allow-unauthenticated
+      - --set-env-vars
+      - CLIENT_ORIGIN=${_CLIENT_ORIGIN}
+
 images:
-  - 'gcr.io/team-3-425920/tarpaulin-api'
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/tarpaulin/${_IMAGE}:$SHORT_SHA

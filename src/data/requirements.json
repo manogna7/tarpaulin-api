@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "projectId": 5,
+    "title": "Upload vendor security questionnaire",
+    "description": "Attach the completed questionnaire so the reviewer can confirm risk coverage.",
+    "points": 0,
+    "due": "2026-07-10T17:00:00.000Z",
+    "assignedUserId": 3
+  },
+  {
+    "id": 2,
+    "projectId": 4,
+    "title": "Submit onboarding access checklist",
+    "description": "Show that required tools, permissions, and repository access were completed.",
+    "points": 0,
+    "due": "2026-06-05T17:00:00.000Z",
+    "assignedUserId": 4
+  },
+  {
+    "id": 3,
+    "projectId": 1,
+    "title": "Attach rollback plan",
+    "description": "Provide the launch rollback steps, owner, and expected recovery window.",
+    "points": 0,
+    "due": "2026-06-12T17:00:00.000Z",
+    "assignedUserId": 3
+  },
+  {
+    "id": 4,
+    "projectId": 2,
+    "title": "Confirm audit control evidence",
+    "description": "Upload the control notes and screenshots needed for the SOC 2 review.",
+    "points": 0,
+    "due": "2026-06-07T17:00:00.000Z",
+    "assignedUserId": 3
+  },
+  {
+    "id": 5,
+    "projectId": 2,
+    "title": "Add launch owner approval",
+    "description": "Capture the named owner approval before this requirement is marked complete.",
+    "points": 0,
+    "due": "2026-06-20T17:00:00.000Z",
+    "assignedUserId": 5
+  },
+  {
+    "id": 6,
+    "projectId": 5,
+    "title": "Upload vendor data handling notes",
+    "description": "Document how customer data is stored, shared, and deleted by the vendor.",
+    "points": 0,
+    "due": "2026-07-05T17:00:00.000Z",
+    "assignedUserId": 3
+  },
+  {
+    "id": 7,
+    "projectId": 3,
+    "title": "Confirm production monitoring is configured",
+    "description": "Attach the dashboard or alert policy showing migration monitoring is ready.",
+    "points": 0,
+    "due": "2026-06-03T17:00:00.000Z",
+    "assignedUserId": 4
+  },
+  {
+    "id": 8,
+    "projectId": 4,
+    "title": "Submit training completion proof",
+    "description": "Upload completion proof for the new hire onboarding checklist.",
+    "points": 0,
+    "due": "2026-06-15T17:00:00.000Z",
+    "assignedUserId": 3
+  },
+  {
+    "id": 9,
+    "projectId": 5,
+    "title": "Attach security review notes",
+    "description": "Include reviewer notes and any unresolved security follow-up items.",
+    "points": 0,
+    "due": "2026-05-25T17:00:00.000Z",
+    "assignedUserId": 5
+  },
+  {
+    "id": 10,
+    "projectId": 2,
+    "title": "Submit accessibility checklist",
+    "description": "Provide accessibility checks before launch approval.",
+    "points": 0,
+    "due": "2026-06-02T17:00:00.000Z",
+    "assignedUserId": 3
+  }
+]

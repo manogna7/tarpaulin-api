@@ -1,166 +1,177 @@
-# Tarpaulin API
+# Tarpaulin
 
-Tarpaulin is a course management tool that involves developing a complete RESTful API for Tarpaulin, allowing users (instructors and students) to manage courses, assignments, and submissions.
-## Table of Contents
+Tarpaulin is a full-stack sign-off tracker for projects that need proof before they can move forward.
 
-- [Project Overview](#project-overview)
-- [Features](#features)
-- [Technologies Used](#technologies-used)
-- [Getting Started](#getting-started)
-- [Running the Application](#running-the-application)
-- [API Endpoints](#api-endpoints)
-- [Deployment](#deployment)
-- [Testing](#testing)
-- [Contributing](#contributing)
-- [License](#license)
+Project leads create requirements, contributors upload evidence, and reviewers approve it or ask for changes. The dashboard shows what is done, what is waiting, and what is blocking the deadline.
 
-## Project Overview
+## Why This Exists
 
-The Tarpaulin API supports various operations for managing courses, assignments, and submissions. The API is designed to be modular and scalable, using modern development practices such as containerization and cloud deployment.
+Teams often manage launch checklists, audit evidence, onboarding tasks, migration approvals, or vendor reviews in spreadsheets and chat threads. That works until nobody knows which proof was uploaded, who reviewed it, or what is still blocking the project.
+
+Tarpaulin gives that work one place to live.
 
 ## Features
 
-- User authentication and authorization (Admin, Instructor, Student roles)
-- CRUD operations for courses, assignments, and submissions
-- File upload and download for assignment submissions
-- Course roster download in CSV format
-- Pagination for large datasets
-- Rate limiting to prevent abuse
-- Docker containerization for all services
+- Login with seeded demo users
+- Project sign-off dashboard
+- Create, update, view, and delete projects
+- Add contributors and reviewers to a project team
+- Create requirement checklists per project
+- Evidence upload API with file metadata
+- Review decisions: approved, needs changes, rejected, blocked, in review
+- Role-aware access for admins, leads, reviewers, and contributors
+- MySQL-backed data model
+- Redis-backed rate limiting
+- Dockerized local development
+- Next.js frontend
 
-## Technologies Used
+## Tech Stack
 
-- **Node.js**: Server-side JavaScript runtime
-- **Express.js**: Web framework for Node.js
-- **MySQL**: Relational database management system
-- **Redis**: In-memory data structure store for caching
-- **RabbitMQ**: Message broker for asynchronous task handling
-- **AWS S3**: Object storage service for file uploads
-- **JWT**: JSON Web Tokens for authentication
-- **Docker**: Containerization platform
-- **Google Cloud Platform**: Cloud hosting and deployment
+- Frontend: Next.js, TypeScript, Tailwind CSS, Lucide icons
+- Backend: Node.js, Express, Sequelize
+- Database: MySQL
+- Cache/rate limiting: Redis
+- Auth: JWT, bcrypt
+- Infrastructure: Docker Compose
 
-## Getting Started
+## Local Setup
 
-### Prerequisites
+Copy the example environment file and update secrets if needed:
 
-- Node.js (>= 14.x)
-- Docker
-- Google Cloud account
-
-### Installation
-
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/yourusername/tarpaulin-api.git
-   cd tarpaulin-api
-   ```
-
-2. Install dependencies:
-   ```sh
-   npm install
-   ```
-
-3. Set up environment variables:
-   Create a `.env` file in the root directory with the following content:
-   ```env
-   DB_HOST=localhost
-   DB_USER=finalP
-   DB_PASSWORD=finalP
-   DB_NAME=finalP
-   ACCESS_TOKEN_SECRET=your-access-token
-   DB_PORT=3306
-   ```
-
-### Generating a Secure JWT Secret Key
-
-To generate a secure JWT secret key, you can use various methods. Here is one recommended way using OpenSSL:
-
-Using OpenSSL:
 ```sh
-openssl rand -base64 32
+cp .env.example .env
 ```
-This will generate a 32-byte random key encoded in base64, for example:
-`wA7pZGtJwMEHP9ZlQf3+Gd0T/jY6h1lJfGi1U7DtYY0=`
 
-## Running the Application
+Start the backend services:
 
-### Using Docker
+```sh
+docker compose up -d --build
+```
 
-Steps to run the complete setup:
-1. Build and start the containers:
-   ```sh
-   docker-compose up -d --build
-   ```
+Apply the non-destructive database migration for evidence review fields:
 
-2. Run the sync script inside the Node.js container to initialize the database:
-   ```sh
-   docker-compose exec app node src/sync.js
-   ```
+```sh
+docker compose exec node-app npm run db:migrate
+```
 
-The API should now be running at `http://localhost:3000`.
+Seed or refresh demo projects, requirements, memberships, and sample evidence files without dropping local tables:
 
-### Without Docker
+```sh
+docker compose exec node-app npm run db:seed
+```
 
-1. Start the MySQL and Redis servers locally.
-2. Run the application:
-   ```sh
-   npm start
-   ```
+Optional: reset and seed demo data. This drops and recreates local tables:
 
-## API Endpoints
+```sh
+docker compose exec node-app npm run db:reset
+```
 
-The API endpoints are defined in the OpenAPI specification (openapi.yaml) and can be viewed in the Swagger editor (https://editor.swagger.io). Below are some key endpoints:
+Start the frontend:
 
-- **User Authentication**
-  - `POST /users/initial`
-  - `POST /users/login`
-  - `GET /users/{id}`
+```sh
+cd client
+npm install
+npm run dev -- -p 3001
+```
 
-- **Courses**
-  - `GET /courses`
-  - `GET /courses/{id}`
-  - `POST /courses`
-  - `PATCH /courses/{id}`
-  - `DELETE /courses/{id}`
-  - `GET /courses/{id}/roster`
-  - `GET /courses/{id}/students`
-  - `POST /courses/{id}/students`
-  - `GET /courses/{id}/assignments`
+Open:
 
-- **Assignments**
-  - `GET /assignments/{id}`
-  - `POST /assignments`
-  - `PATCH /assignments/{id}`
-  - `DELETE /assignments/{id}`
-  - `GET /assignments/{id}/submissions`
-  - `POST /assignments/{id}/submissions`
+- Frontend: http://localhost:3001
+- API: http://localhost:3000
+- Health check: http://localhost:3000/health
 
-- **Submissions**
-  - `PATCH /submissions/{id}`
-  - `GET /media/submissions/{filename}`
+## Demo Accounts
 
-## Deployment
+```text
+Admin
+email: admin@tarpaulin.local
+password: adminpass
 
-### Google Cloud Platform
+Contributor
+email: contributor@tarpaulin.local
+password: contributorpass
 
-1. **Deploy using Google Cloud Run:**
-   - Build and push the Docker image to Google Container Registry:
-     ```sh
-     docker build -t gcr.io/team-3-425920/tarpaulin-api:latest .
-     ```
-   - Deploy the image to Cloud Run:
-     ```sh
-     gcloud run deploy tarpaulin-api --image gcr.io/team-3-425920/tarpaulin-api --platform managed --region us-central1
-     ```
+Project Lead
+email: lead@tarpaulin.local
+password: leadpass
+```
 
-2. **Deploy using Google Kubernetes Engine (GKE):**
-   - Create a cluster:
-     ```sh
-     gcloud container clusters create tarpaulin-cluster --num-nodes=3
-     ```
-   - Deploy the application:
-     ```sh
-     kubectl apply -f k8s-deployment.yaml
-     ```
+## Product API
 
+The product-facing API uses project sign-off language:
+
+```text
+POST /auth/login
+GET  /auth/me
+
+GET  /projects/summary
+GET  /projects
+POST /projects
+GET  /projects/:id
+PATCH /projects/:id
+DELETE /projects/:id
+GET  /projects/:id/team
+POST /projects/:id/team
+DELETE /projects/:id/team/:userId
+GET  /projects/:id/requirements
+POST /projects/:id/requirements
+
+GET  /requirements/:id
+PATCH /requirements/:id
+DELETE /requirements/:id
+GET  /requirements/:id/evidence
+POST /requirements/:id/evidence
+
+GET   /evidence/:id
+GET   /evidence/:id/file
+PATCH /evidence/:id/review
+
+GET /reviews
+GET /health
+```
+
+The public API uses project sign-off language. The local database still keeps a
+few legacy table names internally so existing development data can be migrated
+without a destructive rename.
+
+## Useful Commands
+
+Backend:
+
+```sh
+npm run check
+npm test
+npm run test:api
+npm run db:migrate
+npm run db:seed
+npm run db:reset
+```
+
+Frontend:
+
+```sh
+cd client
+npm run lint
+npm run build
+```
+
+## Portfolio Highlights
+
+Tarpaulin demonstrates:
+
+- Translating an existing backend into a clear product domain
+- REST API design and route protection
+- Relational modeling with Sequelize and MySQL
+- JWT authentication and role-aware authorization
+- Evidence file uploads with protected downloads
+- Dockerized full-stack development
+- A practical Next.js dashboard for real project work
+- End-to-end product workflow: project creation, team assignment, requirement
+  creation, evidence upload, review, download, and cleanup
+
+## Next Improvements
+
+- Add a full Jest/Supertest backend test suite
+- Add frontend component and flow tests
+- Add OpenAPI documentation and Swagger UI
+- Deploy the frontend and backend with managed database and object storage

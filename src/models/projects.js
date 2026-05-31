@@ -1,8 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const User = require('./users');
 
-const Course = sequelize.define('Course', {
+const Project = sequelize.define('Project', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -24,16 +23,32 @@ const Course = sequelize.define('Course', {
     type: DataTypes.STRING,
     allowNull: false
   },
-  instructorId: {
+  leadId: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    field: 'instructorId'
+  },
+  projectCode: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true
+  },
+  productDescription: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  dueDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  status: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'active'
   }
 }, {
+  tableName: 'Courses',
   timestamps: false
 });
 
-// Define relationships
-Course.belongsToMany(User, { through: 'CourseEnrollments', as: 'students' });
-User.belongsToMany(Course, { through: 'CourseEnrollments', as: 'courses' });
-
-module.exports = Course;
+module.exports = Project;

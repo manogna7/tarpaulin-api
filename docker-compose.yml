@@ -1,16 +1,16 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
     container_name: mysql-container
     environment:
-      MYSQL_ROOT_PASSWORD: finalP
-      MYSQL_DATABASE: finalP
-      MYSQL_USER: finalP
-      MYSQL_PASSWORD: finalP
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-finalP}
+      MYSQL_DATABASE: ${DB_NAME:-finalP}
+      MYSQL_USER: ${DB_USER:-finalP}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-finalP}
     ports:
       - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "--silent"]
       interval: 10s
@@ -24,12 +24,21 @@ services:
     container_name: node-app
     environment:
       DB_HOST: mysql
-      DB_USER: finalP
-      DB_PASSWORD: finalP
-      DB_NAME: finalP
-      MYSQL_PORT: 3306
+      DB_USER: ${DB_USER:-finalP}
+      DB_PASSWORD: ${DB_PASSWORD:-finalP}
+      DB_NAME: ${DB_NAME:-finalP}
+      DB_PORT: 3306
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:3001}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET:-local-dev-access-token-secret}
+      UPLOAD_DIR: /usr/src/app/uploads
+      UNAUTHENTICATED_RATE_LIMIT_MAX: ${UNAUTHENTICATED_RATE_LIMIT_MAX:-60}
+      AUTHENTICATED_RATE_LIMIT_MAX: ${AUTHENTICATED_RATE_LIMIT_MAX:-120}
     ports:
       - "3000:3000"
+    volumes:
+      - upload-data:/usr/src/app/uploads
     depends_on:
       mysql:
         condition: service_healthy
@@ -43,9 +52,16 @@ services:
     container_name: redis-container
     ports:
       - "6379:6379"
+    volumes:
+      - redis-data:/data
     networks:
       - app-network
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
+  upload-data:

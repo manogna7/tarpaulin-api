@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "subject": "PROJECT",
+    "number": "LAUNCH-001",
+    "title": "Mobile App Launch Checklist",
+    "term": "active",
+    "leadId": 2,
+    "projectCode": "LAUNCH-001",
+    "productDescription": "Track the sign-offs needed before the mobile release can ship.",
+    "dueDate": "2026-07-15T17:00:00.000Z",
+    "status": "active"
+  },
+  {
+    "id": 2,
+    "subject": "PROJECT",
+    "number": "AUDIT-002",
+    "title": "SOC 2 Evidence Collection",
+    "term": "active",
+    "leadId": 2,
+    "projectCode": "AUDIT-002",
+    "productDescription": "Collect proof for controls that need reviewer approval before audit review.",
+    "dueDate": "2026-08-01T17:00:00.000Z",
+    "status": "active"
+  },
+  {
+    "id": 3,
+    "subject": "PROJECT",
+    "number": "MIGRATE-003",
+    "title": "Cloud Migration Sign-Off",
+    "term": "active",
+    "leadId": 2,
+    "projectCode": "MIGRATE-003",
+    "productDescription": "Confirm monitoring, rollback, access, and data checks before migration.",
+    "dueDate": "2026-07-30T17:00:00.000Z",
+    "status": "active"
+  },
+  {
+    "id": 4,
+    "subject": "PROJECT",
+    "number": "ONBOARD-004",
+    "title": "New Hire Engineering Onboarding",
+    "term": "active",
+    "leadId": 6,
+    "projectCode": "ONBOARD-004",
+    "productDescription": "Make sure every required setup item is complete and verified.",
+    "dueDate": "2026-06-28T17:00:00.000Z",
+    "status": "active"
+  },
+  {
+    "id": 5,
+    "subject": "PROJECT",
+    "number": "VENDOR-005",
+    "title": "Vendor Security Review",
+    "term": "active",
+    "leadId": 7,
+    "projectCode": "VENDOR-005",
+    "productDescription": "Track required vendor documents, security notes, and approvals.",
+    "dueDate": "2026-07-10T17:00:00.000Z",
+    "status": "blocked"
+  }
+]

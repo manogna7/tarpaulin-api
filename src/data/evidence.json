@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "contentType": "text/plain",
+    "filename": "rollback-plan.txt",
+    "requirementId": 3,
+    "contributorId": 3,
+    "timestamp": "2026-05-28T14:30:00-04:00",
+    "reviewDecision": "approved",
+    "reviewNotes": "Rollback owner and recovery window are clear.",
+    "reviewedAt": "2026-05-29T10:15:00-04:00",
+    "reviewerId": 2
+  },
+  {
+    "id": 2,
+    "contentType": "text/plain",
+    "filename": "audit-control-notes.txt",
+    "requirementId": 4,
+    "contributorId": 3,
+    "timestamp": "2026-05-29T11:20:00-04:00",
+    "reviewDecision": "needs_changes",
+    "reviewNotes": "Please add the missing access approval screenshot.",
+    "reviewedAt": "2026-05-29T15:05:00-04:00",
+    "reviewerId": 2
+  },
+  {
+    "id": 101,
+    "contentType": "text/plain",
+    "filename": "monitoring-check.txt",
+    "requirementId": 7,
+    "contributorId": 4,
+    "timestamp": "2026-05-30T09:45:00-04:00",
+    "reviewDecision": "submitted",
+    "reviewNotes": "",
+    "reviewedAt": null,
+    "reviewerId": null
+  }
+]

@@ -42,6 +42,5 @@ const connectWithRetry = async () => {
   }
 };
 
-connectWithRetry();
-
 module.exports = sequelize;
+module.exports.connectWithRetry = connectWithRetry;

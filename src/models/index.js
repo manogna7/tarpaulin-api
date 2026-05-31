@@ -2,32 +2,63 @@ const Sequelize = require('sequelize');
 const sequelize = require('../config/database');
 
 const User = require('./users');
-const Course = require('./courses');
-const Assignment = require('./assignments');
-const CourseEnrollments = require('./enrollments');
-const Submission = require('./submissions');
+const Project = require('./projects');
+const Requirement = require('./requirements');
+const ProjectMembership = require('./project-memberships');
+const Evidence = require('./evidence');
 
-// Define relationships
-Course.belongsToMany(User, { through: CourseEnrollments, as: 'enrolledStudents', foreignKey: 'courseId' });
-User.belongsToMany(Course, { through: CourseEnrollments, as: 'enrolledCourses', foreignKey: 'userId' });
+Project.belongsToMany(User, {
+  through: ProjectMembership,
+  as: 'members',
+  foreignKey: { name: 'projectId', field: 'courseId' },
+  otherKey: 'userId',
+});
+User.belongsToMany(Project, {
+  through: ProjectMembership,
+  as: 'projects',
+  foreignKey: 'userId',
+  otherKey: { name: 'projectId', field: 'courseId' },
+});
 
-Course.hasMany(Assignment, { as: 'assignments', foreignKey: 'courseId' });
-Assignment.belongsTo(Course, { foreignKey: 'courseId' });
+Project.hasMany(Requirement, {
+  as: 'requirements',
+  foreignKey: { name: 'projectId', field: 'courseId' },
+});
+Requirement.belongsTo(Project, {
+  as: 'project',
+  foreignKey: { name: 'projectId', field: 'courseId' },
+});
 
-Course.belongsTo(User, { as: 'instructor', foreignKey: 'instructorId' });
-User.hasMany(Course, { as: 'taughtCourses', foreignKey: 'instructorId' });
+Project.belongsTo(User, {
+  as: 'lead',
+  foreignKey: { name: 'leadId', field: 'instructorId' },
+});
+User.hasMany(Project, {
+  as: 'ledProjects',
+  foreignKey: { name: 'leadId', field: 'instructorId' },
+});
 
-Assignment.hasMany(Submission, { as: 'submissions', foreignKey: 'assignmentId' });
-Submission.belongsTo(Assignment, { foreignKey: 'assignmentId' });
+Requirement.hasMany(Evidence, {
+  as: 'evidence',
+  foreignKey: { name: 'requirementId', field: 'assignmentId' },
+});
+Evidence.belongsTo(Requirement, {
+  as: 'requirement',
+  foreignKey: { name: 'requirementId', field: 'assignmentId' },
+});
 
-Submission.belongsTo(User, { as: 'student', foreignKey: 'studentId' });
+Evidence.belongsTo(User, {
+  as: 'contributor',
+  foreignKey: { name: 'contributorId', field: 'studentId' },
+});
+Requirement.belongsTo(User, { as: 'assignedContributor', foreignKey: 'assignedUserId' });
 
 module.exports = {
   sequelize,
   Sequelize,
   User,
-  Course,
-  Assignment,
-  CourseEnrollments,
-  Submission
+  Project,
+  Requirement,
+  ProjectMembership,
+  Evidence
 };

@@ -1,51 +1,58 @@
 [
     {
-      "name": "admin1",
-      "email": "admin1@example.com",
+      "id": 1,
+      "name": "Admin User",
+      "email": "admin@tarpaulin.local",
       "password": "adminpass",
       "role": "admin"
     },
     {
-      "name": "instructor1",
-      "email": "instructor1@example.com",
-      "password": "instructorpass",
+      "id": 2,
+      "name": "Maya Chen",
+      "email": "lead@tarpaulin.local",
+      "password": "leadpass",
       "role": "instructor"
     },
     {
-      "name": "student1",
-      "email": "student1@example.com",
-      "password": "studentpass",
+      "id": 3,
+      "name": "Jordan Lee",
+      "email": "contributor@tarpaulin.local",
+      "password": "contributorpass",
       "role": "student"
     },
     {
-      "name": "student2",
-      "email": "student2@example.com",
-      "password": "studentpass",
+      "id": 4,
+      "name": "Avery Patel",
+      "email": "contributor2@tarpaulin.local",
+      "password": "contributorpass",
       "role": "student"
     },
     {
-      "name": "student3",
-      "email": "student3@example.com",
-      "password": "studentpass",
+      "id": 5,
+      "name": "Sam Rivera",
+      "email": "reviewer@tarpaulin.local",
+      "password": "reviewerpass",
       "role": "student"
     },
     {
-      "name": "instructor2",
-      "email": "instructor2@example.com",
-      "password": "instructorpass",
+      "id": 6,
+      "name": "Priya Shah",
+      "email": "lead2@tarpaulin.local",
+      "password": "leadpass",
       "role": "instructor"
     },
     {
-      "name": "instructor3",
-      "email": "instructor3@example.com",
-      "password": "instructorpass",
+      "id": 7,
+      "name": "Noah Brooks",
+      "email": "lead3@tarpaulin.local",
+      "password": "leadpass",
       "role": "instructor"
     },
     {
-      "name": "instructor4",
-      "email": "instructor4@example.com",
-      "password": "instructorpass",
+      "id": 8,
+      "name": "Elena Garcia",
+      "email": "lead4@tarpaulin.local",
+      "password": "leadpass",
       "role": "instructor"
     }
   ]
-  

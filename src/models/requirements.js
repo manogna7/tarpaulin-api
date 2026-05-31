@@ -1,18 +1,19 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const Course = require('./courses');
+const Project = require('./projects');
 
-const Assignment = sequelize.define('Assignment', {
+const Requirement = sequelize.define('Requirement', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true
   },
-  courseId: {
+  projectId: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    field: 'courseId',
     references: {
-      model: Course,
+      model: Project,
       key: 'id'
     }
   },
@@ -31,9 +32,14 @@ const Assignment = sequelize.define('Assignment', {
   due: {
     type: DataTypes.DATE,
     allowNull: false
+  },
+  assignedUserId: {
+    type: DataTypes.INTEGER,
+    allowNull: true
   }
 }, {
+  tableName: 'Assignments',
   timestamps: false
 });
 
-module.exports = Assignment;
+module.exports = Requirement;

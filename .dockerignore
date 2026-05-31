@@ -1,0 +1,8 @@
+node_modules
+client/node_modules
+client/.next
+.git
+.env
+.DS_Store
+uploads
+npm-debug.log
