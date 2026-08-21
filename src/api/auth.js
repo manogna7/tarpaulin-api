@@ -38,16 +38,25 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/me', authenticateToken, async (req, res) => {
-  const user = await User.findByPk(req.user.id);
+  try {
+    const user = await User.findByPk(req.user.id);
 
-  if (!user) {
-    return res.status(404).json({ error: 'User not found.' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    res.json(mapContributor(user));
+  } catch (err) {
+    console.error('Error loading current user:', err);
+    res.status(500).json({ error: 'Unable to load current user.' });
   }
-
-  res.json(mapContributor(user));
 });
 
 router.get('/users', authenticateToken, async (req, res) => {
+  if (!['admin', 'instructor'].includes(req.user.role)) {
+    return res.status(403).json({ error: 'Only admins and project leads can view the user directory.' });
+  }
+
   try {
     const users = await User.findAll({
       attributes: ['id', 'name', 'email', 'role'],

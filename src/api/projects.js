@@ -1,7 +1,13 @@
 const express = require('express');
 const { Op } = require('sequelize');
-const { Project, User, Requirement, Evidence, ProjectMembership } = require('../models');
+const { sequelize, Project, User, Requirement, Evidence, ProjectMembership } = require('../models');
 const authenticateToken = require('../middleware/authenticator');
+const {
+  getProjectAccess,
+  getRequirementAccess,
+  visibleEvidenceFor,
+} = require('../utils/access-control');
+const { asDate, asText } = require('../utils/input-validation');
 const {
   buildSummary,
   mapContributor,
@@ -9,40 +15,51 @@ const {
   mapProject,
   mapRequirement,
 } = require('../utils/product-mapping');
+const { removeUploadedFiles } = require('../utils/uploads');
 
 const router = express.Router();
 
 const projectStatuses = new Set(['active', 'completed', 'blocked', 'archived']);
 const projectRoles = new Set(['contributor', 'reviewer']);
 
-function asText(value) {
-  return typeof value === 'string' ? value.trim() : '';
-}
-
-function asDate(value) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
 function isProjectCreator(user) {
   return user.role === 'admin' || user.role === 'instructor';
 }
 
 function canManageProject(user, project) {
-  return user.role === 'admin' || user.id === project.leadId;
+  return getProjectAccess(user, project).canManage;
 }
 
-async function canViewProject(user, projectId, leadId) {
-  if (user.role === 'admin' || user.id === leadId) return true;
-
+async function resolveProjectAccess(user, project) {
   const membership = await ProjectMembership.findOne({
     where: {
-      projectId: projectId,
+      projectId: project.id,
       userId: user.id,
     },
   });
 
-  return Boolean(membership);
+  return getProjectAccess(user, project, membership);
+}
+
+async function visibleProjectWhere(user) {
+  if (user.role === 'admin') return {};
+
+  const memberships = await ProjectMembership.findAll({
+    where: { userId: user.id },
+    attributes: ['projectId'],
+  });
+  const projectIds = memberships.map((membership) => membership.projectId);
+
+  if (user.role === 'instructor') {
+    return {
+      [Op.or]: [
+        { leadId: user.id },
+        { id: { [Op.in]: projectIds } },
+      ],
+    };
+  }
+
+  return { id: { [Op.in]: projectIds } };
 }
 
 async function ensureProjectManager(req, res) {
@@ -162,28 +179,60 @@ async function ensureUniqueProjectCode(code, currentProjectId = null) {
 async function assertAssignableProjectUser(userId, projectId) {
   if (!userId) return true;
 
-  const membership = await ProjectMembership.findOne({
-    where: { projectId: projectId, userId },
-  });
+  const [membership, user] = await Promise.all([
+    ProjectMembership.findOne({
+      where: { projectId: projectId, userId },
+    }),
+    User.findByPk(userId),
+  ]);
 
-  return Boolean(membership);
+  return membership?.projectRole === 'contributor' && user?.role === 'student';
 }
 
 router.get('/summary', authenticateToken, async (req, res) => {
   try {
-    const [projectRecords, requirementRecords, evidenceRecords] = await Promise.all([
-      Project.findAll(),
+    const projectRecords = await Project.findAll({
+      where: await visibleProjectWhere(req.user),
+    });
+    const projectIds = projectRecords.map((project) => project.id);
+
+    if (!projectIds.length) {
+      return res.json(buildSummary([], [], []));
+    }
+
+    const [requirementRecords, memberships] = await Promise.all([
       Requirement.findAll({
+        where: { projectId: { [Op.in]: projectIds } },
         include: [{ model: Evidence, as: 'evidence' }],
       }),
-      Evidence.findAll(),
+      ProjectMembership.findAll({
+        where: { userId: req.user.id, projectId: { [Op.in]: projectIds } },
+      }),
     ]);
+    const projectsById = new Map(projectRecords.map((project) => [project.id, project]));
+    const membershipsByProjectId = new Map(
+      memberships.map((membership) => [membership.projectId, membership])
+    );
+    const visibleEvidence = [];
 
     const projects = projectRecords.map(mapProject);
-    const requirements = requirementRecords.map((requirement) =>
-      mapRequirement(requirement, requirement.evidence || [])
-    );
-    const evidence = evidenceRecords.map(mapEvidence);
+    const requirements = requirementRecords.map((requirement) => {
+      const project = projectsById.get(requirement.projectId);
+      const access = getRequirementAccess(
+        req.user,
+        requirement,
+        project,
+        membershipsByProjectId.get(requirement.projectId)
+      );
+      const requirementEvidence = visibleEvidenceFor(
+        req.user,
+        requirement.evidence || [],
+        access
+      );
+      visibleEvidence.push(...requirementEvidence);
+      return mapRequirement(requirement, requirementEvidence);
+    });
+    const evidence = visibleEvidence.map(mapEvidence);
 
     res.json(buildSummary(projects, requirements, evidence));
   } catch (err) {
@@ -195,6 +244,7 @@ router.get('/summary', authenticateToken, async (req, res) => {
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const projects = await Project.findAll({
+      where: await visibleProjectWhere(req.user),
       order: [['id', 'ASC']],
     });
 
@@ -271,13 +321,21 @@ router.get('/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Project not found.' });
     }
 
-    if (!(await canViewProject(req.user, project.id, project.leadId))) {
+    const access = await resolveProjectAccess(req.user, project);
+
+    if (!access.canView) {
       return res.status(403).json({ error: 'You do not have access to this project.' });
     }
 
-    const requirements = (project.requirements || []).map((requirement) =>
-      mapRequirement(requirement, requirement.evidence || [])
-    );
+    const requirements = (project.requirements || []).map((requirement) => {
+      const requirementAccess = getRequirementAccess(req.user, requirement, project, {
+        projectRole: access.projectRole,
+      });
+      return mapRequirement(
+        requirement,
+        visibleEvidenceFor(req.user, requirement.evidence || [], requirementAccess)
+      );
+    });
 
     res.json({
       ...mapProject(project),
@@ -353,11 +411,26 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       attributes: ['id'],
     });
     const requirementIds = requirements.map((requirement) => requirement.id);
+    const evidence = requirementIds.length
+      ? await Evidence.findAll({
+        where: { requirementId: { [Op.in]: requirementIds } },
+        attributes: ['path'],
+      })
+      : [];
 
-    await Evidence.destroy({ where: { requirementId: requirementIds } });
-    await Requirement.destroy({ where: { projectId: project.id } });
-    await ProjectMembership.destroy({ where: { projectId: project.id } });
-    await project.destroy();
+    await sequelize.transaction(async (transaction) => {
+      if (requirementIds.length) {
+        await Evidence.destroy({
+          where: { requirementId: { [Op.in]: requirementIds } },
+          transaction,
+        });
+      }
+      await Requirement.destroy({ where: { projectId: project.id }, transaction });
+      await ProjectMembership.destroy({ where: { projectId: project.id }, transaction });
+      await project.destroy({ transaction });
+    });
+
+    await removeUploadedFiles(evidence);
 
     res.status(204).send();
   } catch (err) {
@@ -384,7 +457,9 @@ router.get('/:id/team', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Project not found.' });
     }
 
-    if (!(await canViewProject(req.user, project.id, project.leadId))) {
+    const access = await resolveProjectAccess(req.user, project);
+
+    if (!access.canView) {
       return res.status(403).json({ error: 'You do not have access to this project team.' });
     }
 
@@ -425,6 +500,10 @@ router.post('/:id/team', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'User not found.' });
     }
 
+    if (user.role !== 'student') {
+      return res.status(400).json({ error: 'Project contributors and reviewers must be contributor users.' });
+    }
+
     const [membership] = await ProjectMembership.findOrCreate({
       where: { projectId: project.id, userId },
       defaults: { projectId: project.id, userId, projectRole },
@@ -451,6 +530,16 @@ router.delete('/:id/team/:userId', authenticateToken, async (req, res) => {
     const userId = Number(req.params.userId);
     if (project.leadId === userId) {
       return res.status(400).json({ error: 'The project lead cannot be removed from the team.' });
+    }
+
+    const assignedRequirementCount = await Requirement.count({
+      where: { projectId: project.id, assignedUserId: userId },
+    });
+
+    if (assignedRequirementCount > 0) {
+      return res.status(409).json({
+        error: 'Reassign this team member\'s requirements before removing them from the project.',
+      });
     }
 
     const removed = await ProjectMembership.destroy({
@@ -487,14 +576,22 @@ router.get('/:id/requirements', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Project not found.' });
     }
 
-    if (!(await canViewProject(req.user, project.id, project.leadId))) {
+    const access = await resolveProjectAccess(req.user, project);
+
+    if (!access.canView) {
       return res.status(403).json({ error: 'You do not have access to these requirements.' });
     }
 
     res.json({
-      requirements: (project.requirements || []).map((requirement) =>
-        mapRequirement(requirement, requirement.evidence || [])
-      ),
+      requirements: (project.requirements || []).map((requirement) => {
+        const requirementAccess = getRequirementAccess(req.user, requirement, project, {
+          projectRole: access.projectRole,
+        });
+        return mapRequirement(
+          requirement,
+          visibleEvidenceFor(req.user, requirement.evidence || [], requirementAccess)
+        );
+      }),
     });
   } catch (err) {
     console.error('Error loading requirements:', err);
@@ -516,7 +613,9 @@ router.post('/:id/requirements', authenticateToken, async (req, res) => {
       values.assignedContributorId &&
       !(await assertAssignableProjectUser(values.assignedContributorId, project.id))
     ) {
-      return res.status(400).json({ error: 'Assigned contributor must be on the project team.' });
+      return res.status(400).json({
+        error: 'Assigned contributor must have the contributor role on the project team.',
+      });
     }
 
     const requirement = await Requirement.create({

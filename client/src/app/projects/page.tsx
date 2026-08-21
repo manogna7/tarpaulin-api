@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -45,11 +46,16 @@ export default function ProjectsPage() {
     const storedRole = localStorage.getItem("tarpaulin_role") || "";
 
     if (!token) {
-      window.location.href = "/";
+      router.replace("/");
       return;
     }
 
-    Promise.all([getProjects(token), getUsers(token)])
+    const canLoadUsers = ["admin", "project_lead"].includes(storedRole);
+
+    Promise.all([
+      getProjects(token),
+      canLoadUsers ? getUsers(token) : Promise.resolve([]),
+    ])
       .then(([loadedProjects, loadedUsers]) => {
         setProjects(loadedProjects);
         setUsers(loadedUsers);
@@ -58,7 +64,7 @@ export default function ProjectsPage() {
       .catch((err) =>
         setError(err instanceof Error ? err.message : "Unable to load projects."),
       );
-  }, []);
+  }, [router]);
 
   const filteredProjects = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -267,11 +273,7 @@ export default function ProjectsPage() {
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {filteredProjects.map((project) => (
-                <tr
-                  key={project.id}
-                  onClick={() => router.push(`/projects/${project.id}`)}
-                  className="cursor-pointer transition hover:bg-zinc-50"
-                >
+                <tr key={project.id} className="transition hover:bg-zinc-50">
                   <td className="px-5 py-4">
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600">
@@ -279,9 +281,12 @@ export default function ProjectsPage() {
                       </div>
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="font-medium text-zinc-950">
+                          <Link
+                            href={`/projects/${project.id}`}
+                            className="font-medium text-zinc-950 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600"
+                          >
                             {project.name}
-                          </p>
+                          </Link>
                           <span className="rounded-md bg-zinc-100 px-2 py-1 text-xs font-semibold text-zinc-600">
                             {project.code}
                           </span>
@@ -299,8 +304,14 @@ export default function ProjectsPage() {
                   <td className="px-5 py-4">
                     <StatusBadge status={project.status} />
                   </td>
-                  <td className="px-5 py-4 text-zinc-500">
-                    <ArrowRight size={16} />
+                  <td className="px-5 py-4">
+                    <Link
+                      href={`/projects/${project.id}`}
+                      aria-label={`Open ${project.name}`}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600"
+                    >
+                      <ArrowRight size={16} />
+                    </Link>
                   </td>
                 </tr>
               ))}

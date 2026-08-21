@@ -40,6 +40,7 @@ playwright-report/
 .turbo/
 .vercel/
 .eslintcache
+.npm-cache/
 *.tsbuildinfo
 
 # OS and editor files

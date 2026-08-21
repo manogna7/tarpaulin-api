@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   CheckCircle2,
@@ -28,6 +29,7 @@ function formatDate(value: string) {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [currentRole, setCurrentRole] = useState("");
   const [projects, setProjects] = useState<Project[]>([]);
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -38,7 +40,7 @@ export default function DashboardPage() {
     const storedRole = localStorage.getItem("tarpaulin_role") || "user";
 
     if (!token) {
-      window.location.href = "/";
+      router.replace("/");
       return;
     }
 
@@ -51,7 +53,7 @@ export default function DashboardPage() {
       .catch((err) =>
         setError(err instanceof Error ? err.message : "Unable to load dashboard."),
       );
-  }, []);
+  }, [router]);
 
   const highlightedProjects = useMemo(() => projects.slice(0, 6), [projects]);
   const openRequirements = summary?.openRequirements ?? 0;

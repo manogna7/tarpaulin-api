@@ -17,9 +17,10 @@ Tarpaulin gives that work one place to live.
 - Create, update, view, and delete projects
 - Add contributors and reviewers to a project team
 - Create requirement checklists per project
-- Evidence upload API with file metadata
+- Evidence uploads limited to the contributor assigned to each requirement
 - Review decisions: approved, needs changes, rejected, blocked, in review
-- Role-aware access for admins, leads, reviewers, and contributors
+- Project-scoped lists, summaries, evidence visibility, and user-directory access
+- Transactional project and requirement cleanup, including uploaded files
 - MySQL-backed data model
 - Redis-backed rate limiting
 - Dockerized local development
@@ -103,6 +104,7 @@ The product-facing API uses project sign-off language:
 ```text
 POST /auth/login
 GET  /auth/me
+GET  /auth/users
 
 GET  /projects/summary
 GET  /projects
@@ -155,6 +157,11 @@ npm run lint
 npm run build
 ```
 
+`npm test` runs focused authorization, input-validation, upload-path safety, and
+backend syntax tests. With the Docker services running, `npm run test:api`
+exercises login, project scoping, project/team/requirement creation, assigned
+uploads, evidence privacy, review, download, and deletion end to end.
+
 ## Portfolio Highlights
 
 Tarpaulin demonstrates:
@@ -171,7 +178,7 @@ Tarpaulin demonstrates:
 
 ## Next Improvements
 
-- Add a full Jest/Supertest backend test suite
-- Add frontend component and flow tests
+- Expand the API smoke suite into isolated database integration tests
+- Add frontend component and browser flow tests
 - Add OpenAPI documentation and Swagger UI
 - Deploy the frontend and backend with managed database and object storage

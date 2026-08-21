@@ -6,29 +6,29 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "check": "node --check server.js",
+    "check": "node scripts/check-js.js",
     "db:migrate": "node src/migrate.js",
     "db:seed": "node src/seed-demo.js",
     "db:reset": "node src/sync.js",
-    "test": "npm run check",
+    "test": "node --test tests/*.test.js && npm run check",
     "test:api": "node scripts/smoke-api.js"
   },
   "author": "Manogna",
   "license": "ISC",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "express-rate-limit": "^7.3.1",
-    "ioredis": "^5.4.1",
-    "jsonwebtoken": "^9.0.2",
-    "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1",
-    "mysql2": "^3.10.0",
-    "rate-limit-redis": "^4.2.0",
-    "retry-as-promised": "^7.0.4",
-    "sequelize": "^6.37.3"
+    "dotenv": "^17.4.2",
+    "express": "^4.22.2",
+    "express-rate-limit": "^7.5.1",
+    "ioredis": "^5.11.1",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.11.0",
+    "multer": "^2.2.0",
+    "mysql2": "^3.23.4",
+    "rate-limit-redis": "^4.3.1",
+    "retry-as-promised": "^7.1.1",
+    "sequelize": "^6.37.8"
   },
   "overrides": {
     "uuid": "11.1.1"

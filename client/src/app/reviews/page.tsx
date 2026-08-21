@@ -101,7 +101,7 @@ export default function ReviewsPage() {
           <div>
             <h3 className="font-semibold text-zinc-950">Review queue</h3>
             <p className="mt-1 text-sm text-zinc-500">
-              Evidence visible to project leads and admins.
+              Evidence visible to project leads, reviewers, and admins.
             </p>
           </div>
           <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-semibold text-zinc-600">

@@ -1,11 +1,26 @@
 const express = require('express');
-const fs = require('fs/promises');
-const { Requirement, Project, ProjectMembership, Evidence, User } = require('../models');
+const { sequelize, Requirement, Project, ProjectMembership, Evidence, User } = require('../models');
 const authenticateToken = require('../middleware/authenticator');
-const { evidenceUpload } = require('../utils/uploads');
+const {
+  getRequirementAccess: calculateRequirementAccess,
+  visibleEvidenceFor,
+} = require('../utils/access-control');
+const { asDate } = require('../utils/input-validation');
+const { evidenceUpload, removeUploadedFiles } = require('../utils/uploads');
 const { mapEvidence, mapRequirement } = require('../utils/product-mapping');
 
 const router = express.Router();
+
+function mapRequirementWithPermissions(requirement, evidence, access) {
+  return {
+    ...mapRequirement(requirement, evidence),
+    permissions: {
+      canManage: access.canManage,
+      canReview: access.canReview,
+      canSubmit: access.canSubmit,
+    },
+  };
+}
 
 async function getRequirementAccess(user, requirement) {
   const project = await Project.findByPk(requirement.projectId);
@@ -14,30 +29,13 @@ async function getRequirementAccess(user, requirement) {
     return { canView: false, canReview: false, canSubmit: false, canManage: false };
   }
 
-  const isAdmin = user.role === 'admin';
-  const isLead = user.id === project.leadId;
   const membership = await ProjectMembership.findOne({
     where: {
       projectId: project.id,
       userId: user.id,
     },
   });
-  const projectRole = membership?.projectRole || null;
-
-  return {
-    canView: isAdmin || isLead || Boolean(membership),
-    canReview: isAdmin || isLead || projectRole === 'reviewer',
-    canSubmit: user.role === 'student' && projectRole !== 'reviewer' && Boolean(membership),
-    canManage: isAdmin || isLead,
-  };
-}
-
-function visibleEvidenceFor(user, evidence, access) {
-  if (access.canReview) {
-    return evidence;
-  }
-
-  return evidence.filter((item) => item.contributorId === user.id);
+  return calculateRequirementAccess(user, requirement, project, membership);
 }
 
 function runEvidenceUpload(req, res, next) {
@@ -70,9 +68,10 @@ router.get('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'You do not have access to this requirement.' });
     }
 
-    res.json(mapRequirement(
+    res.json(mapRequirementWithPermissions(
       requirement,
-      visibleEvidenceFor(req.user, requirement.evidence || [], access)
+      visibleEvidenceFor(req.user, requirement.evidence || [], access),
+      access
     ));
   } catch (err) {
     console.error('Error loading requirement:', err);
@@ -96,7 +95,7 @@ router.patch('/:id', authenticateToken, async (req, res) => {
 
     const title = typeof req.body.title === 'string' ? req.body.title.trim() : undefined;
     const description = typeof req.body.description === 'string' ? req.body.description.trim() : undefined;
-    const dueDate = req.body.dueDate === undefined ? undefined : new Date(req.body.dueDate);
+    const dueDate = req.body.dueDate === undefined ? undefined : asDate(req.body.dueDate);
     const assignedContributorId = req.body.assignedContributorId === undefined
       ? undefined
       : req.body.assignedContributorId === null
@@ -115,7 +114,7 @@ router.patch('/:id', authenticateToken, async (req, res) => {
     }
 
     if (req.body.dueDate !== undefined) {
-      if (Number.isNaN(dueDate.getTime())) {
+      if (!dueDate) {
         return res.status(400).json({ error: 'A valid due date is required.' });
       }
       updates.due = dueDate;
@@ -134,8 +133,12 @@ router.patch('/:id', authenticateToken, async (req, res) => {
           },
         });
 
-        if (!membership) {
-          return res.status(400).json({ error: 'Assigned contributor must be on the project team.' });
+        const contributor = await User.findByPk(assignedContributorId);
+
+        if (membership?.projectRole !== 'contributor' || contributor?.role !== 'student') {
+          return res.status(400).json({
+            error: 'Assigned contributor must have the contributor role on the project team.',
+          });
         }
       }
 
@@ -155,7 +158,12 @@ router.patch('/:id', authenticateToken, async (req, res) => {
       ],
     });
 
-    res.json(mapRequirement(updatedRequirement, updatedRequirement.evidence || []));
+    const updatedAccess = await getRequirementAccess(req.user, updatedRequirement);
+    res.json(mapRequirementWithPermissions(
+      updatedRequirement,
+      updatedRequirement.evidence || [],
+      updatedAccess
+    ));
   } catch (err) {
     console.error('Error updating requirement:', err);
     res.status(500).json({ error: 'Unable to update requirement.' });
@@ -176,8 +184,17 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Only the project lead or an admin can delete this requirement.' });
     }
 
-    await Evidence.destroy({ where: { requirementId: requirement.id } });
-    await requirement.destroy();
+    const evidence = await Evidence.findAll({
+      where: { requirementId: requirement.id },
+      attributes: ['path'],
+    });
+
+    await sequelize.transaction(async (transaction) => {
+      await Evidence.destroy({ where: { requirementId: requirement.id }, transaction });
+      await requirement.destroy({ transaction });
+    });
+
+    await removeUploadedFiles(evidence);
 
     res.status(204).send();
   } catch (err) {
@@ -267,7 +284,7 @@ router.post(
       console.error('Error uploading evidence:', err);
 
       if (req.file?.path) {
-        await fs.unlink(req.file.path).catch(() => {});
+        await removeUploadedFiles([{ path: req.file.path }]);
       }
 
       res.status(500).json({ error: 'Unable to upload evidence.' });

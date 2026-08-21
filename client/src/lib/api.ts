@@ -47,6 +47,11 @@ export type Requirement = {
   latestEvidence: Evidence | null;
   assignedContributorId?: number | null;
   assignedContributor?: Contributor | null;
+  permissions?: {
+    canManage: boolean;
+    canReview: boolean;
+    canSubmit: boolean;
+  };
 };
 
 export type ProjectTeam = {

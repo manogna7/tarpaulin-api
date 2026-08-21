@@ -76,13 +76,14 @@ export default function ProjectDetailPage() {
       setError("");
 
       try {
-        const [loadedProject, loadedTeam, loadedRequirements, loadedUsers] =
-          await Promise.all([
-            getProject(accessToken, projectId),
-            getProjectTeam(accessToken, projectId),
-            getProjectRequirements(accessToken, projectId),
-            getUsers(accessToken),
-          ]);
+        const [loadedProject, loadedTeam, loadedRequirements] = await Promise.all([
+          getProject(accessToken, projectId),
+          getProjectTeam(accessToken, projectId),
+          getProjectRequirements(accessToken, projectId),
+        ]);
+        const canManage =
+          storedRole === "admin" || storedUserId === loadedProject.leadId;
+        const loadedUsers = canManage ? await getUsers(accessToken) : [];
 
         setProject(loadedProject);
         setContributors(loadedTeam.contributors);
@@ -120,6 +121,7 @@ export default function ProjectDetailPage() {
   );
   const availableTeamUsers = users.filter(
     (user) =>
+      user.role === "contributor" &&
       user.id !== project?.leadId &&
       !contributors.some((contributor) => contributor.id === user.id),
   );

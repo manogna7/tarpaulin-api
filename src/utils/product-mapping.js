@@ -98,7 +98,7 @@ function buildSummary(projects, requirements, evidence) {
   const requirementStatuses = requirements.map((requirement) => requirement.status);
 
   return {
-    activeProjects: projects.length,
+    activeProjects: projects.filter((project) => project.status === 'active').length,
     openRequirements: requirementStatuses.filter((status) => status !== 'approved').length,
     evidenceWaitingForReview: evidence.filter((item) =>
       ['submitted', 'in_review'].includes(item.reviewDecision)

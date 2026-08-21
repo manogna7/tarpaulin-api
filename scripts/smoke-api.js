@@ -129,6 +129,34 @@ async function main() {
   const adminToken = await login('admin@tarpaulin.local', 'adminpass');
   const contributorToken = await login('contributor@tarpaulin.local', 'contributorpass');
   const secondContributorToken = await login('contributor2@tarpaulin.local', 'contributorpass');
+  const reviewerToken = await login('reviewer@tarpaulin.local', 'reviewerpass');
+
+  await request('/auth/users', {
+    headers: authHeaders(contributorToken),
+    expectedStatus: 403,
+  });
+
+  const contributorProjects = await request('/projects', {
+    headers: authHeaders(contributorToken),
+  });
+
+  if (contributorProjects.data.projects.some((item) => item.id === 3)) {
+    throw new Error('Project list privacy check failed: contributor can see a project they do not belong to.');
+  }
+
+  const reviewerRequirement = await request('/requirements/7', {
+    headers: authHeaders(reviewerToken),
+  });
+  const reviewerQueue = await request('/reviews', {
+    headers: authHeaders(reviewerToken),
+  });
+
+  if (
+    reviewerRequirement.data.permissions?.canReview !== true ||
+    !reviewerQueue.data.reviews.some((item) => item.requirementId === 7)
+  ) {
+    throw new Error('Reviewer access check failed.');
+  }
 
   const summary = await request('/projects/summary', { headers: authHeaders(adminToken) });
   const projects = await request('/projects', { headers: authHeaders(adminToken) });
@@ -147,6 +175,23 @@ async function main() {
   }
 
   const uniqueCode = `SMOKE-${Date.now()}`;
+
+  await request('/projects', {
+    method: 'POST',
+    headers: {
+      ...authHeaders(adminToken),
+      'Content-Type': 'application/json',
+    },
+    body: {
+      name: 'Invalid Smoke Project',
+      code: `${uniqueCode}-INVALID`,
+      description: 'This project must be rejected because its due date is null.',
+      dueDate: null,
+      leadId: 2,
+    },
+    expectedStatus: 400,
+  });
+
   const createdProject = await request('/projects', {
     method: 'POST',
     headers: {
@@ -178,6 +223,19 @@ async function main() {
     expectedStatus: 201,
   });
 
+  await request(`/projects/${createdProjectId}/team`, {
+    method: 'POST',
+    headers: {
+      ...authHeaders(adminToken),
+      'Content-Type': 'application/json',
+    },
+    body: {
+      userId: 4,
+      role: 'contributor',
+    },
+    expectedStatus: 201,
+  });
+
   const createdRequirement = await request(`/projects/${createdProjectId}/requirements`, {
     method: 'POST',
     headers: {
@@ -197,6 +255,8 @@ async function main() {
     throw new Error('Requirement creation did not return an ID.');
   }
 
+  const createdRequirementId = createdRequirement.data.requirement.id;
+
   const file = multipartFile(
     'file',
     'smoke-evidence.txt',
@@ -204,7 +264,7 @@ async function main() {
     `Smoke test evidence created at ${new Date().toISOString()}`
   );
 
-  await request('/requirements/3/evidence', {
+  await request(`/requirements/${createdRequirementId}/evidence`, {
     method: 'POST',
     headers: {
       ...authHeaders(adminToken),
@@ -214,7 +274,17 @@ async function main() {
     expectedStatus: 403,
   });
 
-  const upload = await request('/requirements/3/evidence', {
+  await request(`/requirements/${createdRequirementId}/evidence`, {
+    method: 'POST',
+    headers: {
+      ...authHeaders(secondContributorToken),
+      'Content-Type': file.contentType,
+    },
+    rawBody: file.body,
+    expectedStatus: 403,
+  });
+
+  const upload = await request(`/requirements/${createdRequirementId}/evidence`, {
     method: 'POST',
     headers: {
       ...authHeaders(contributorToken),
@@ -228,13 +298,31 @@ async function main() {
     throw new Error('Evidence upload did not return the expected submitted evidence.');
   }
 
-  const privateEvidence = await request('/requirements/3/evidence', {
+  const privateEvidence = await request(`/requirements/${createdRequirementId}/evidence`, {
     headers: authHeaders(secondContributorToken),
   });
 
   if (privateEvidence.data.evidence.some((item) => item.id === upload.data.id)) {
     throw new Error('Evidence privacy check failed: another contributor can see the uploaded file.');
   }
+
+  const privateRequirementList = await request(
+    `/projects/${createdProjectId}/requirements`,
+    { headers: authHeaders(secondContributorToken) }
+  );
+  const privateRequirement = privateRequirementList.data.requirements.find(
+    (item) => item.id === createdRequirementId
+  );
+
+  if (!privateRequirement || privateRequirement.evidenceCount !== 0 || privateRequirement.latestEvidence) {
+    throw new Error('Requirement list privacy check failed: another contributor can see evidence metadata.');
+  }
+
+  await request(`/projects/${createdProjectId}/team/3`, {
+    method: 'DELETE',
+    headers: authHeaders(adminToken),
+    expectedStatus: 409,
+  });
 
   await request(`/evidence/${upload.data.id}/review`, {
     method: 'PATCH',
@@ -277,6 +365,11 @@ async function main() {
     method: 'DELETE',
     headers: authHeaders(adminToken),
     expectedStatus: 204,
+  });
+
+  await request(`/evidence/${upload.data.id}`, {
+    headers: authHeaders(adminToken),
+    expectedStatus: 404,
   });
 
   console.log('API smoke test passed.');

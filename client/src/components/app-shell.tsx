@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import {
   Building2,
@@ -39,13 +40,6 @@ const navItems = [
   },
 ] as const;
 
-function clearSession() {
-  localStorage.removeItem("tarpaulin_token");
-  localStorage.removeItem("tarpaulin_role");
-  localStorage.removeItem("tarpaulin_user_id");
-  window.location.href = "/";
-}
-
 export function AppShell({
   active,
   eyebrow,
@@ -53,6 +47,15 @@ export function AppShell({
   description,
   children,
 }: AppShellProps) {
+  const router = useRouter();
+
+  function clearSession() {
+    localStorage.removeItem("tarpaulin_token");
+    localStorage.removeItem("tarpaulin_role");
+    localStorage.removeItem("tarpaulin_user_id");
+    router.replace("/");
+  }
+
   return (
     <main className="min-h-screen bg-[#f5f7f9] text-zinc-950">
       <div className="flex min-h-screen">

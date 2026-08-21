@@ -40,13 +40,11 @@ export default function RequirementDetailPage() {
   const [evidence, setEvidence] = useState<Evidence[]>([]);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
-  const [currentRole, setCurrentRole] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("tarpaulin_token");
-    const storedRole = localStorage.getItem("tarpaulin_role") || "user";
 
     if (!token) {
       router.push("/");
@@ -71,7 +69,6 @@ export default function RequirementDetailPage() {
 
         setRequirement(loadedRequirement);
         setEvidence(loadedEvidence);
-        setCurrentRole(storedRole);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Unable to load requirement.",
@@ -164,8 +161,8 @@ export default function RequirementDetailPage() {
     }
   }
 
-  const canReview = ["admin", "project_lead"].includes(currentRole);
-  const canSubmit = currentRole === "contributor";
+  const canReview = Boolean(requirement?.permissions?.canReview);
+  const canSubmit = Boolean(requirement?.permissions?.canSubmit);
 
   return (
     <AppShell

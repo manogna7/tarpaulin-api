@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const fs = require('fs');
+const fsPromises = require('fs/promises');
 const multer = require('multer');
 const path = require('path');
 
@@ -40,7 +41,40 @@ const evidenceUpload = multer({
   },
 });
 
+function isPathInsideUploadDir(filePath, baseDirectory = uploadDir) {
+  if (!filePath) return false;
+
+  const basePath = path.resolve(baseDirectory);
+  const resolvedPath = path.resolve(filePath);
+  const relativePath = path.relative(basePath, resolvedPath);
+
+  return relativePath !== '' && !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
+}
+
+async function removeUploadedFiles(evidenceItems, logger = console) {
+  const results = await Promise.all((evidenceItems || []).map(async (item) => {
+    if (!isPathInsideUploadDir(item.path)) {
+      logger.warn(`Skipped evidence file outside the upload directory: ${item.path || '(missing path)'}`);
+      return false;
+    }
+
+    try {
+      await fsPromises.unlink(path.resolve(item.path));
+      return true;
+    } catch (err) {
+      if (err.code !== 'ENOENT') {
+        logger.error(`Unable to remove evidence file ${item.path}:`, err);
+      }
+      return false;
+    }
+  }));
+
+  return results;
+}
+
 module.exports = {
   uploadDir,
   evidenceUpload,
+  isPathInsideUploadDir,
+  removeUploadedFiles,
 };
